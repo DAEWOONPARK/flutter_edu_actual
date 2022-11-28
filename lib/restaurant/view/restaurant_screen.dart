@@ -42,21 +42,8 @@ class RestaurantScreen extends StatelessWidget {
                       json: item,
                     );
 
-                    return RestaurantCard(
-                      // image: Image.asset(
-                      //   'asset/img/food/ddeok_bok_gi.jpg',
-                      //   fit: BoxFit.cover,
-                      // ),
-                      image: Image.network(
-                        pItem.thumbUrl,
-                        fit: BoxFit.cover,
-                      ),
-                      name: pItem.name,
-                      tags: pItem.tags,
-                      ratingsCount: pItem.ratingsCount,
-                      deliveryTime: pItem.deliveryTime,
-                      deliveryFee: pItem.deliveryFee,
-                      ratings: pItem.ratings,
+                    return RestaurantCard.fromModel(
+                      model: pItem,
                     );
                   },
                   separatorBuilder: (_, index) {
