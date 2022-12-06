@@ -48,7 +48,7 @@ class RestaurantModel {
   // }) {
   //   return RestaurantModel(
   //     id: json['id'],
-  //     name: json['name'],용
+  //     name: json['name'],
   //     thumbUrl: 'http://$ip${json['thumbUrl']}',
   //     tags: List<String>.from(json['tags']),
   //     priceRange: RestaurantPriceRange.values
