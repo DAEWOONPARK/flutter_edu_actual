@@ -9,7 +9,7 @@ final restaurantDetailProvider =
     Provider.family<RestaurantModel?, String>((ref, id) {
   final state = ref.watch(restaurantProvider);
 
-  if (state is! CursorPagination<RestaurantModel>) {
+  if (state is! CursorPagination) {
     return null;
   }
 
@@ -32,7 +32,7 @@ class RestaurantStateNotifier extends StateNotifier<CursorPaginationBase> {
     paginate(); // Class가 인스턴스화 되는 순간에 paginate() 함수를 실행할 수 있다. 즉, state 안에 값들을 저장할 수 있다.
   }
 
-  void paginate({
+  Future<void> paginate({
     int fetchCount = 20,
     // true - 추가로 더 가져옴, false - 새로고침
     bool fetchMore = false,
@@ -122,5 +122,30 @@ class RestaurantStateNotifier extends StateNotifier<CursorPaginationBase> {
     } catch (e) {
       state = CursorPaginationError(message: '데이터를 가져오지 못했습니다.');
     }
+  }
+
+  void getDetail({
+    required String id,
+  }) async {
+    // 만약에 아직 데이터가 하나도 없는 상태라면 (CursorPagination이 아니라면)
+    // 데이터를 가져오는 시도를 한다.
+    if (state is! CursorPagination) {
+      await paginate();
+    }
+
+    // state가 CursorPagination이 아닐 때 그냥 리턴
+    if (state is! CursorPagination) {
+      return;
+    }
+
+    final pState = state as CursorPagination;
+
+    final resp = await repository.getRestaurantDetail(id: id);
+
+    state = pState.copyWith(
+      data: pState.data
+          .map<RestaurantModel>((e) => e.id == id ? resp : e)
+          .toList(),
+    );
   }
 }

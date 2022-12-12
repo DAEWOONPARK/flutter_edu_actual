@@ -8,7 +8,7 @@ import 'package:actual/restaurant/repository/restaurant_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RestaurantDetailScreen extends ConsumerWidget {
+class RestaurantDetailScreen extends ConsumerStatefulWidget {
   final String id;
 
   const RestaurantDetailScreen({
@@ -17,24 +17,42 @@ class RestaurantDetailScreen extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(restaurantDetailProvider(id));
+  ConsumerState<RestaurantDetailScreen> createState() =>
+      _RestaurantDetailScreenState();
+}
 
-    if(state == null) {
-      return DefaultLayout(child: Center(child: CircularProgressIndicator(),));
+class _RestaurantDetailScreenState
+    extends ConsumerState<RestaurantDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    ref.read(restaurantProvider.notifier).getDetail(id: widget.id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(restaurantDetailProvider(widget.id));
+
+    if (state == null) {
+      return DefaultLayout(
+          child: Center(
+        child: CircularProgressIndicator(),
+      ));
     }
 
     return DefaultLayout(
-        title: '불타는 떡볶이',
-        child: CustomScrollView(
-          slivers: [
-            renderTop(model: state),
-            // renderLabel(),
-            // renderProducts(
-            // products: snapshot.data!.products,
-            // ),
-          ],
-        ),
+      title: '불타는 떡볶이',
+      child: CustomScrollView(
+        slivers: [
+          renderTop(model: state),
+          if (state is RestaurantDetailModel) renderLabel(),
+          if (state is RestaurantDetailModel)
+            renderProducts(
+              products: state.products,
+            ),
+        ],
+      ),
     );
   }
 
