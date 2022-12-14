@@ -10,12 +10,12 @@ class UserModel {
   @JsonKey(
     fromJson: DataUtils.pathToUrl
   )
-  final String imgUrl;
+  final String imageUrl;
 
   UserModel({
     required this.id,
     required this.username,
-    required this.imgUrl,
+    required this.imageUrl,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json)
