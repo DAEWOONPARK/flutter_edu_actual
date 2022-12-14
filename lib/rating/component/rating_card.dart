@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../common/const/colors.dart';
 import 'package:collection/collection.dart';
 
+import '../model/rating_model.dart';
+
 class RatingCard extends StatelessWidget {
   // Network Image, Asset Image
   final ImageProvider avatarImage; // CircleAvatar
@@ -20,6 +22,20 @@ class RatingCard extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  factory RatingCard.fromModel({
+    required RatingModel model,
+  }) {
+    return RatingCard(
+      avatarImage: NetworkImage(
+        model.user.imageUrl,
+      ),
+      images: model.imgUrls.map((e) => Image.network(e)).toList(),
+      rating: model.rating,
+      email: model.user.username,
+      content: model.content,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -35,7 +51,7 @@ class RatingCard extends StatelessWidget {
         _Body(
           content: content,
         ),
-        if(images.length > 0)
+        if (images.length > 0)
           SizedBox(
             height: 100,
             child: _Images(
