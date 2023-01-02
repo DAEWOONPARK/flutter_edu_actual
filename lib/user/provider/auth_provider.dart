@@ -71,7 +71,7 @@ class AuthProvider extends ChangeNotifier {
     // UserModel, 사용자 정보가 있는 상태라면 로그인 중이거나,
     // 현재 위치가 SplashScreen이면 홈으로 이동
     if (user is UserModel) {
-      return logginIn || state.location == 'splash' ? '/' : null;
+      return logginIn || state.location == '/splash' ? '/' : null;
     }
 
     // UserModelError
