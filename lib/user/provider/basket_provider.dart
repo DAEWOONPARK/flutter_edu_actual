@@ -52,46 +52,46 @@ class BasketProvider extends StateNotifier<List<BasketItemModel>> {
     // 사용자에게 빠르게 동작하는 앱이라는 경험할 수 있게 한다.
     // -> Optimistic Response(긍정적 응답): 응답이 성공할 것이라고 가정하고 상태를 먼저 업데이트 함
     await patchBasket();
+  }
 
-    Future<void> removeFromBasket({
-      required ProductModel product,
-      // true이면 count와 관계없이 삭제한다.
-      bool isDelete = false,
-    }) async {
-      // 1) 장바구니에 상품이 존재할 때
-      //    1) 상품의 카운트가 1보다 크면 -1한다.
-      //    2) 상품의 카운트가 1이면 삭제한다.
-      // 2) 상품이 존재하지 않을 때, 즉시 함수 반환하고 아무것도 하지 않는다.
+  Future<void> removeFromBasket({
+    required ProductModel product,
+    // true이면 count와 관계없이 삭제한다.
+    bool isDelete = false,
+  }) async {
+    // 1) 장바구니에 상품이 존재할 때
+    //    1) 상품의 카운트가 1보다 크면 -1한다.
+    //    2) 상품의 카운트가 1이면 삭제한다.
+    // 2) 상품이 존재하지 않을 때, 즉시 함수 반환하고 아무것도 하지 않는다.
 
-      final exists =
-          state.firstWhereOrNull((e) => e.product.id == product.id) != null;
+    final exists =
+        state.firstWhereOrNull((e) => e.product.id == product.id) != null;
 
-      if (!exists) {
-        return;
-      }
-
-      final existingProduct = state.firstWhere((e) =>
-      e.product.id == product.id);
-
-      if (existingProduct.count == 1 || isDelete) {
-        state = state
-            .where(
-              (e) => e.product.id != product.id,
-        )
-            .toList();
-      } else {
-        state = state
-            .map(
-              (e) =>
-          e.product.id == product.id
-              ? e.copyWith(
-            count: e.count - 1,
-          )
-              : e,
-        )
-            .toList();
-      }
-      await patchBasket();
+    if (!exists) {
+      return;
     }
+
+    final existingProduct = state.firstWhere((e) =>
+    e.product.id == product.id);
+
+    if (existingProduct.count == 1 || isDelete) {
+      state = state
+          .where(
+            (e) => e.product.id != product.id,
+      )
+          .toList();
+    } else {
+      state = state
+          .map(
+            (e) =>
+        e.product.id == product.id
+            ? e.copyWith(
+          count: e.count - 1,
+        )
+            : e,
+      )
+          .toList();
+    }
+    await patchBasket();
   }
 }
