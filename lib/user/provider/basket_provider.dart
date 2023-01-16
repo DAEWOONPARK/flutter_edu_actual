@@ -1,6 +1,7 @@
 import 'package:actual/product/model/product_model.dart';
 import 'package:actual/user/model/basket_item_model.dart';
 import 'package:actual/user/model/patch_basket_body.dart';
+import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
 
@@ -8,23 +9,36 @@ import '../repository/user_me_repository.dart';
 
 final basketProvider =
     StateNotifierProvider<BasketProvider, List<BasketItemModel>>((ref) {
-      final repository = ref.watch(userMeRepositoryProvider);
+  final repository = ref.watch(userMeRepositoryProvider);
   return BasketProvider(repository: repository);
 });
 
 class BasketProvider extends StateNotifier<List<BasketItemModel>> {
   final UserMeRepository repository;
+  final updateBasketDebounce = Debouncer(
+    Duration(seconds: 1),
+    initialValue: null, //updateBasket할 때는 파라미터가 없기 때문에 null
+    checkEquality: false,
+  );
 
-  BasketProvider({required this.repository,}) : super([]);
+  BasketProvider({
+    required this.repository,
+  }) : super([]) {
+    updateBasketDebounce.values.listen((event) {
+      patchBasket();
+    });
+  }
 
   Future<void> patchBasket() async {
     await repository.patchBasket(
         body: PatchBasketBody(
-          basket: state.map((e) =>
-              PatchBasketBodyBasket(productId: e.product.id, count: e.count,)
-          ).toList(),
-        )
-    );
+      basket: state
+          .map((e) => PatchBasketBodyBasket(
+                productId: e.product.id,
+                count: e.count,
+              ))
+          .toList(),
+    ));
   }
 
   Future<void> addToBasket({
@@ -40,8 +54,8 @@ class BasketProvider extends StateNotifier<List<BasketItemModel>> {
       state = state
           .map(
             (e) =>
-        e.product.id == product.id ? e.copyWith(count: e.count + 1) : e,
-      )
+                e.product.id == product.id ? e.copyWith(count: e.count + 1) : e,
+          )
           .toList();
     } else {
       state = [...state, BasketItemModel(product: product, count: 1)];
@@ -51,7 +65,7 @@ class BasketProvider extends StateNotifier<List<BasketItemModel>> {
     // 굳이 캐싱 업데이트를 서버 요청 후에 하는 것보단, 캐싱 업데이트를 먼저 해주는게
     // 사용자에게 빠르게 동작하는 앱이라는 경험할 수 있게 한다.
     // -> Optimistic Response(긍정적 응답): 응답이 성공할 것이라고 가정하고 상태를 먼저 업데이트 함
-    await patchBasket();
+    updateBasketDebounce.setValue(null);
   }
 
   Future<void> removeFromBasket({
@@ -71,27 +85,25 @@ class BasketProvider extends StateNotifier<List<BasketItemModel>> {
       return;
     }
 
-    final existingProduct = state.firstWhere((e) =>
-    e.product.id == product.id);
+    final existingProduct = state.firstWhere((e) => e.product.id == product.id);
 
     if (existingProduct.count == 1 || isDelete) {
       state = state
           .where(
             (e) => e.product.id != product.id,
-      )
+          )
           .toList();
     } else {
       state = state
           .map(
-            (e) =>
-        e.product.id == product.id
-            ? e.copyWith(
-          count: e.count - 1,
-        )
-            : e,
-      )
+            (e) => e.product.id == product.id
+                ? e.copyWith(
+                    count: e.count - 1,
+                  )
+                : e,
+          )
           .toList();
     }
-    await patchBasket();
+    updateBasketDebounce.setValue(null);
   }
 }
