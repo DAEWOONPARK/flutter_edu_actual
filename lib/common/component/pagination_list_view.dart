@@ -93,32 +93,40 @@ class _PaginationListViewState<T extends IModelWithId> extends ConsumerState<Pag
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: ListView.separated(
-        controller: controller,
-        itemCount: cp.data.length + 1,
-        itemBuilder: (_, index) {
-          if (index == cp.data.length) {
-            return Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Center(
-                  child: cp is CursorPaginationFetchingMore
-                      ? CircularProgressIndicator()
-                      : Text('마지막 데이터 입니다 ㅠㅠ')),
-            );
-          }
-
-          final pItem = cp.data[index];
-
-          return widget.itemBuilder(
-            context,
-            index,
-            pItem,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          ref.read(widget.provider.notifier).paginate(
+            forceRefetch: true, // 이걸 없애면, 데이터를 유지한채로 새로고침 됨
           );
         },
-        separatorBuilder: (_, index) {
-          return const SizedBox(height: 16.0);
-        },
+        child: ListView.separated(
+          physics: AlwaysScrollableScrollPhysics(), // iPhone에서는 데이터길이가 스크롤이 생성될 만큼 길지 않으면 당겨지지 않는데, 이 함수를 넣어주면 당겨짐
+          controller: controller,
+          itemCount: cp.data.length + 1,
+          itemBuilder: (_, index) {
+            if (index == cp.data.length) {
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Center(
+                    child: cp is CursorPaginationFetchingMore
+                        ? CircularProgressIndicator()
+                        : Text('마지막 데이터 입니다 ㅠㅠ')),
+              );
+            }
+
+            final pItem = cp.data[index];
+
+            return widget.itemBuilder(
+              context,
+              index,
+              pItem,
+            );
+          },
+          separatorBuilder: (_, index) {
+            return const SizedBox(height: 16.0);
+          },
+        ),
       ),
     );
   }
