@@ -11,7 +11,7 @@ import 'package:actual/restaurant/model/restaurant_model.dart';
 import 'package:actual/restaurant/provider/restaurant_provider.dart';
 import 'package:actual/restaurant/provider/restaurant_rating_provider.dart';
 import 'package:actual/user/provider/basket_provider.dart';
-import 'package:badges/badges.dart';
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -77,7 +77,7 @@ class _RestaurantDetailScreenState
           context.pushNamed(BasketScreen.routeName);
         },
         backgroundColor: PRIMARY_COLOR,
-        child: Badge(
+        child: badges.Badge(
           showBadge: basket.isNotEmpty,
           badgeContent: Text(
             basket
@@ -88,7 +88,9 @@ class _RestaurantDetailScreenState
               fontSize: 10.0,
             ),
           ),
-          badgeColor: Colors.white,
+          badgeStyle: badges.BadgeStyle(
+            badgeColor: Colors.white,
+          ),
           child: Icon(
             Icons.shopping_basket_outlined,
           ),
